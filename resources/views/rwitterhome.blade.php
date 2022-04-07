@@ -31,11 +31,6 @@
                     <button class="btn btn-danger fa-regular fa-trash-can" onclick="return confirm('Pretende eliminar o rwit?')"></button>
                 </form>
 
-                {{-- <form action="/rwitterhome/{{ $faq->id }}" method="POST">
-                    @csrf
-                    @method('POST')
-                    <button class="btn btn-danger fa-solid fa-arrow-up"></button>
-                </form> --}}
             </div>
         </div>
         @endforeach
