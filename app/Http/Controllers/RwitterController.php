@@ -65,7 +65,6 @@ class RwitterController extends Controller
 
     /* Move Up */
     public function funfat($id){
-
         $grabinfo = ModelsUserActivity::select('id', 'position')
             ->where('id',$id)
             ->get();
@@ -74,17 +73,15 @@ class RwitterController extends Controller
         $grabid =  $grabinfo[0]['id'];
         $grabposition =  $grabinfo[0]['position'];
 
-
-        /* Agarra o id mais alto */
-        $max =  ModelsUserActivity::max('id');
-        $maxposition = ModelsUserActivity::select('position')
-            ->where('id', $max)
+        $maxposition =  ModelsUserActivity::max('position');
+        $maxid = ModelsUserActivity::select('id')
+            ->where('position', $maxposition)
             ->get();
 
-        $comp = $maxposition[0]['position'];
+        $comp = $maxid[0]['position'];
 
         /* if para saber se o feed que queremos subir já está no topo */
-        if ($grabposition < $comp){
+        if ($grabposition < $maxposition){
             /* Não se encontra no topo então */
 
             /* Nova posição */
