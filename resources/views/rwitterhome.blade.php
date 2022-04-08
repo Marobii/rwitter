@@ -30,7 +30,6 @@
                     @method('DELETE')
                     <button class="btn btn-danger fa-regular fa-trash-can" onclick="return confirm('Pretende eliminar o rwit?')"></button>
                 </form>
-            </div>
 
             {{-- <form action="/funfa/{{ $faq->id }}" method="POST">
                 @csrf
