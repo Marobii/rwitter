@@ -19,7 +19,7 @@ class RwitterController extends Controller
     public function index()
     {
 
-            $qas = ModelsUserActivity::orderBy('updated_at', 'desc')->get();
+            $qas = ModelsUserActivity::orderBy('position', 'desc')->get();
             return view('/rwitterhome',compact('qas'));
 
     }
@@ -64,22 +64,19 @@ class RwitterController extends Controller
 
     public function funfat($id){
         $receive = null;
+        $la = 0;
         /* Indica posição do id */
         $currentposition = ModelsUserActivity::select('id', 'position')
             ->where('id',$id)
             ->get();
 
 
-        /* Verificar todas posições */
+        /* Recebe todas posições */
         $checkallpositions = ModelsUserActivity::select('position')
             ->get();
-            /* error_log($checkallpositions);
-            error_log($currentposition);
-            error_log($checkallpositions[3]['position']); */
 
-            /* error_log($currentposition); */
 
-        /* Sabe a posição deste id */
+        /* Sabe a posição do id que queremos subir */
         $comp = $currentposition[0]['position'];
         error_log($comp);
 
@@ -87,8 +84,20 @@ class RwitterController extends Controller
         foreach($checkallpositions as $index=>$opt){
             /* Compara se existe maior */
             if($checkallpositions[$index]['position'] > $comp ){
-                /* recebe posição acima da atual */
+                /* recebe posição para qual queremo ir */
                 $receive = $checkallpositions[$index]['position'];
+                /* Pede o id que queremos descer */
+                $downgrade = ModelsUserActivity::select('id')
+                ->where('position', $receive)
+                ->get();
+
+                /* Recebe o id que queremos descer */
+                $iddown = $downgrade[0]['id'];
+                error_log($iddown);
+
+                ModelsUserActivity::where("id", $id)->update(["position" => $receive]);
+                ModelsUserActivity::where("id", $iddown)->update(["position" => $receive - 1]);
+
                 break;
             } else {
                 error_log("nada maior");
@@ -98,7 +107,13 @@ class RwitterController extends Controller
         /* calcular se existe posição acima da atual */
         /* se existir trocar com temp valv */
 
-        return redirect('/rwitterhome')->with('info', $receive);
+        return redirect('/rwitterhome')->with('info');
     }
-
 }
+/* update */
+/* ModelsUserActivity::where("id", $id)->update(["position" => $receive]); */
+
+/* Select */
+/* $downgrade = ModelsUserActivity::select('id')
+                ->where('position', $receive)
+                ->get(); */
