@@ -9,7 +9,7 @@ class UserActivity extends Model
     //Connect to correct table
     protected $table = 'useractivity';
     protected $fillable = [
-        'message',
+        'message', 'position'
     ];
 
 }

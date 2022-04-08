@@ -30,8 +30,20 @@
                     @method('DELETE')
                     <button class="btn btn-danger fa-regular fa-trash-can" onclick="return confirm('Pretende eliminar o rwit?')"></button>
                 </form>
-
             </div>
+
+            {{-- <form action="/funfa/{{ $faq->id }}" method="POST">
+                @csrf
+                <div class="d-flex flex-row">
+                    <button type="submit" class="btn btn-primary btn-lg "><span>Rwit</span></button>
+                </div>
+            </form> --}}
+
+            <form action="/funfa/{{$faq->id }}" method="POST">
+                @csrf
+                <button class="btn btn-danger fa-regular fa-trash-can"></button>
+            </form>
+
         </div>
         @endforeach
     </div>

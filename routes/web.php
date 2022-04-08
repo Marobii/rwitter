@@ -13,12 +13,13 @@ use Illuminate\Support\Facades\Auth;
 | contains the "web" middleware group. Now create something great!
 |
 */
+Auth::routes();
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-/* Criar nova rota para nova página + views */
+
 Route::get('/rwitterhome', function () {
     return view('rwitterhome');
 });
@@ -26,9 +27,8 @@ Route::get('/rwitterhome', function () {
 
 Route::get('/rwitterhome', 'RwitterController@index')->middleware('auth');
 Route::post('/rwit', 'RwitterController@store');
+Route::post('/funfa/{id}', 'RwitterController@funfat');
 Route::delete('/rwitterhome/{id}', 'RwitterController@destroy')->middleware('auth');
-
-Auth::routes();
 
 
 Route::get('/forgot-password', function () {

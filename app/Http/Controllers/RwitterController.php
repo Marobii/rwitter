@@ -4,9 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\UserActivity as ModelsUserActivity;
 use Illuminate\Http\Request;
-use DB;
 use Database\Factories\UserFactory;
+use Illuminate\Support\Facades\DB;
 use PhpParser\Node\Expr\AssignOp\Mod;
+use Symfony\Component\Console\Logger\ConsoleLogger;
 
 class RwitterController extends Controller
 {
@@ -18,7 +19,7 @@ class RwitterController extends Controller
     public function index()
     {
 
-            $qas = ModelsUserActivity::orderBy('id', 'desc')->get();
+            $qas = ModelsUserActivity::orderBy('updated_at', 'desc')->get();
             return view('/rwitterhome',compact('qas'));
 
     }
@@ -28,8 +29,15 @@ class RwitterController extends Controller
     {
         $paper = new ModelsUserActivity();
 
-
         $paper->message = request('message');
+
+        $lastinsertedid = ModelsUserActivity::max('id');
+
+        !empty($lastinsertedid) ? $lastposition = $lastinsertedid : $lastposition = 0;
+
+        $newposition = $lastposition + 1;
+
+        $paper->position = $newposition;
 
         $msg = $_POST['message'];
 
@@ -40,7 +48,7 @@ class RwitterController extends Controller
         } else {
             /* Informa que o rwitt foi publicado */
             $paper->save();
-            error_log($msg);
+
             return redirect('/rwitterhome')->with('info', 'Rwitter enviado com sucesso');
         }
 
@@ -52,6 +60,45 @@ class RwitterController extends Controller
         $bb->delete();
 
         return redirect('/rwitterhome');
+    }
+
+    public function funfat($id){
+        $receive = null;
+        /* Indica posição do id */
+        $currentposition = ModelsUserActivity::select('id', 'position')
+            ->where('id',$id)
+            ->get();
+
+
+        /* Verificar todas posições */
+        $checkallpositions = ModelsUserActivity::select('position')
+            ->get();
+            /* error_log($checkallpositions);
+            error_log($currentposition);
+            error_log($checkallpositions[3]['position']); */
+
+            /* error_log($currentposition); */
+
+        /* Sabe a posição deste id */
+        $comp = $currentposition[0]['position'];
+        error_log($comp);
+
+        /* Mostra todas as posições */
+        foreach($checkallpositions as $index=>$opt){
+            /* Compara se existe maior */
+            if($checkallpositions[$index]['position'] > $comp ){
+                /* recebe posição acima da atual */
+                $receive = $checkallpositions[$index]['position'];
+                break;
+            } else {
+                error_log("nada maior");
+            }
+        }
+
+        /* calcular se existe posição acima da atual */
+        /* se existir trocar com temp valv */
+
+        return redirect('/rwitterhome')->with('info', $receive);
     }
 
 }

@@ -16,6 +16,7 @@ return new class extends Migration
         Schema::create('useractivity', function (Blueprint $table) {
             $table->id();
             $table->string('message')->nullable();
+            $table->integer('position')->default(0);
             $table->timestamps();
         });
 
