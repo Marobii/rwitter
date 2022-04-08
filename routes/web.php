@@ -28,6 +28,7 @@ Route::get('/rwitterhome', function () {
 Route::get('/rwitterhome', 'RwitterController@index')->middleware('auth');
 Route::post('/rwit', 'RwitterController@store');
 Route::post('/funfa/{id}', 'RwitterController@funfat');
+Route::post('/godown/{id}', 'RwitterController@funfadown');
 Route::delete('/rwitterhome/{id}', 'RwitterController@destroy')->middleware('auth');
 
 

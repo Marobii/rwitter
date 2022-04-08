@@ -40,7 +40,12 @@
 
             <form action="/funfa/{{$faq->id }}" method="POST">
                 @csrf
-                <button class="btn btn-danger fa-regular fa-trash-can"></button>
+                <button class="btn btn-danger fa-solid fa-arrow-up"></button>
+            </form>
+
+            <form action="/godown/{{$faq->id }}" method="POST">
+                @csrf
+                <button class="btn btn-danger fa-solid fa-arrow-down"></button>
             </form>
 
         </div>
