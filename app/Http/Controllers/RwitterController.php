@@ -31,6 +31,7 @@ class RwitterController extends Controller
 
         $paper->message = request('message');
 
+        /* Pede a db o id maximo e armazena */
         $lastinsertedid = ModelsUserActivity::max('id');
 
         /* Ternário para saber se o último id é nulo, se for atribui 0 senão atribui o valor de $lastinsertedid */
@@ -55,8 +56,9 @@ class RwitterController extends Controller
 
     }
 
+    /* Move up */
     public function moveup($id){
-        /* Agarrar na informação do feed que queremos mover */
+        /* Receber informação do feed que queremos mover */
         $grabinfo = ModelsUserActivity::select('id', 'position')
             ->where('id',$id)
             ->get();
@@ -65,82 +67,87 @@ class RwitterController extends Controller
         $grabid =  $grabinfo[0]['id'];
         $grabposition =  $grabinfo[0]['position'];
 
-        /* Pedir a db a maior posição na db */
+        /* Pedir a db a maior posição existente */
         $maxposition =  ModelsUserActivity::max('position');
+
+        /* Pedir a db o id correspondente a maior posição existente */
         $maxid = ModelsUserActivity::select('id')
             ->where('position', $maxposition)
             ->get();
 
-        /* Sei que o max position tem id = dbgrabid */
-        $dbgrabid = $maxid[0]['id'];
 
+        /* Incrementar a posição do tweet selecionado */
         $confirmnext = $grabposition + 1;
 
+        /* Verificar na base de dados se existe um id que corresponda a posição incrementada */
         $askdb = ModelsUserActivity::select('id')
             ->where('position', $confirmnext)
             ->get();
 
-        $compare = $grabposition;
-        if ($maxposition == $compare){
+        /* Compara se a posição atual é igual a maior posição existente */
+        if ($maxposition == $grabposition){
+            /* Se for verdade ele não deixa  */
             error_log("Já estás no topo");
         }else {
+
             if(empty($askdb[0])){
+                /* Pedir a base de dados todos os ids as posições que lhe correspondem ordenando por id de forma ascendente */
                 $checkall=ModelsUserActivity::select('id' , 'position')
                 ->orderBy('position', 'asc')
                 ->get();
+
+                /* Procurar no array em cada elemento */
                 foreach($checkall as $index=>$opt){
-                    $test = $checkall[$index]['position'];
-                    if ($test === $grabposition){
+                    /* Receber o valor da posição de acordo com o index do array */
+                    $position = $checkall[$index]['position'];
+                    if ($position === $grabposition){
                         error_log("faz nada");
                     }else {
-                        error_log($checkall);
-                        if ($test > $grabposition ) {
+                        if ($position > $grabposition ) {
 
-                            /* Id acima */
-                            $redirect = ModelsUserActivity::select('id')
-                            ->where('position', $test)
+                            /* Pedir a db o id que corresponde a variavel $position */
+                            $idposition = ModelsUserActivity::select('id')
+                            ->where('position', $position)
                             ->get();
 
-                            $unveil = $redirect[0]['id'];
+                            /* Receber o id do array e armazenar numa nova variavel */
+                            $storeid = $idposition[0]['id'];
 
-                            ModelsUserActivity::where("id", $unveil)->update(["position" => $grabposition]);
-                            ModelsUserActivity::where("id", $grabid)->update(["position" => $test]);
+                            /* Update nas posições na db */
+                            ModelsUserActivity::where("id", $storeid)->update(["position" => $grabposition]);
+                            ModelsUserActivity::where("id", $grabid)->update(["position" => $position]);
 
                             break;
                         }
                     }
                 }
-                /* [{"id":17,"position":3},{"id":18,"position":2},{"id":21,"position":19},{"id":22,"position":22}] */
-                /* ModelsUserActivity::where("id", $tradeid)->update(["position" => $trade2position]);
-                ModelsUserActivity::where("id", $trade2id)->update(["position" => $tradeposition]); */
 
             } else {
-                $temp = $grabposition + 1;
+                /* Incrementar a posição do tweet selecionado e armazenar numa nova variavel */
+                $incposition = $grabposition + 1;
 
-            /* Pedimos a db o id da posição que queremos ir $temp */
-            $giveid = ModelsUserActivity::select('id')
-            ->where('position', $temp)
-            ->get();
+                /* Verificar na db o id da posição para a qual queremos mover o nosso tweet */
+                $giveid = ModelsUserActivity::select('id')
+                ->where('position', $incposition)
+                ->get();
 
-            /* Retiramos do array o valor do id que tem a posição que queremos ir */
-            $idabove = $giveid[0]['id'];
+                /* Retirar do array o valor do id*/
+                $idabove = $giveid[0]['id'];
 
-            /* Pedimos a posição do id acima ao tweet que queremos mover */
-            $giveposition = ModelsUserActivity::select('position')
-            ->where('id', $idabove)
-            ->get();
+                /* Verificar a posição do id para a qual queremos mover o nosso tweet */
+                $giveposition = ModelsUserActivity::select('position')
+                ->where('id', $idabove)
+                ->get();
 
-            /* Retiramos do array a posição do id acima ao que queremos mover */
-            $feedaboveposition = $giveposition[0]['position'];
+                /* Retirar do array a posição do id para a qual queremos mover o nosso tweet */
+                $feedaboveposition = $giveposition[0]['position'];
 
-            /* Vamos atualizar a posição do tweet que queremos mover para a nova posição */
-            ModelsUserActivity::where("id", $grabid)->update(["position" => $feedaboveposition]);
+                /* Update dos valores na db */
+                ModelsUserActivity::where("id", $grabid)->update(["position" => $feedaboveposition]);
+                ModelsUserActivity::where("id", $idabove)->update(["position" => $grabposition]);
 
-            /* Vamos atualizar a posição do tweet acima para a posição antiga do tweet que temos que selecionar */
-            ModelsUserActivity::where("id", $idabove)->update(["position" => $grabposition]);
-
-            error_log("entrei");
-            }
+                error_log("entrei");
+                }
         }
 
         return redirect('/rwitterhome')->with('info');
@@ -148,7 +155,7 @@ class RwitterController extends Controller
 
     /* Move Down */
     public function movedown($id){
-        /* Agarrar na informação do feed que queremos mover */
+        /* Receber informação do feed que queremos mover */
         $grabinfo = ModelsUserActivity::select('id', 'position')
             ->where('id',$id)
             ->get();
@@ -157,30 +164,33 @@ class RwitterController extends Controller
         $grabid =  $grabinfo[0]['id'];
         $grabposition =  $grabinfo[0]['position'];
 
-        /* Pedir a db a maior posição na db */
+        /* Pedir a db a menor posição existente */
         $minposition =  ModelsUserActivity::min('position');
         $minid = ModelsUserActivity::select('id')
             ->where('position', $minposition)
             ->get();
 
-        /* Sei que o max position tem id = dbgrabid */
-        $dbgrabid = $minid[0]['id'];
-
+        /* Redução da posição do tweet selecionado */
         $confirmnext = $grabposition - 1;
 
+        /* Verificar na base de dados se existe um id que corresponda a posição incrementada */
         $askdb = ModelsUserActivity::select('id')
             ->where('position', $confirmnext)
             ->get();
 
-        $compare = $grabposition;
-        if ($minposition == $compare){
+        /* Compara se a posição atual é igual a menor posição existente */
+        if ($minposition == $grabposition){
             error_log("Já estás no fundo");
         }else {
             if(empty($askdb[0])){
+                /* Pedir a base de dados todos os ids as posições que lhe correspondem ordenando por id de forma ascendente */
                 $checkall=ModelsUserActivity::select('id' , 'position')
                 ->orderBy('position', 'asc')
                 ->get();
+
+                /* Procurar no array em cada elemento */
                 foreach($checkall as $index=>$opt){
+                    /* Receber o valor da posição de acordo com o index do array */
                     $test = $checkall[$index]['position'];
                     if ($test === $grabposition){
                         error_log("faz nada");
@@ -188,47 +198,43 @@ class RwitterController extends Controller
                         error_log($checkall);
                         if ($test < $grabposition && $minposition != $test) {
 
-                            /* Id acima */
+                            /* Pedir a db o id que corresponde a variavel $position */
                             $redirect = ModelsUserActivity::select('id')
                             ->where('position', $test)
                             ->get();
 
-                            $unveil = $redirect[0]['id'];
+                            /* Receber o id do array e armazenar numa nova variavel */
+                            $storeid  = $redirect[0]['id'];
 
-                            ModelsUserActivity::where("id", $unveil)->update(["position" => $grabposition]);
+                            ModelsUserActivity::where("id", $storeid)->update(["position" => $grabposition]);
                             ModelsUserActivity::where("id", $grabid)->update(["position" => $test]);
 
                             break;
                         }
                     }
                 }
-                /* [{"id":17,"position":3},{"id":18,"position":2},{"id":21,"position":19},{"id":22,"position":22}] */
-                /* ModelsUserActivity::where("id", $tradeid)->update(["position" => $trade2position]);
-                ModelsUserActivity::where("id", $trade2id)->update(["position" => $tradeposition]); */
-
             } else {
+                /* Redução a posição do tweet selecionado e armazenar numa nova variavel */
                 $temp = $grabposition - 1;
 
-            /* Pedimos a db o id da posição que queremos ir $temp */
+            /* Verificar na db o id da posição para a qual queremos mover o nosso tweet */
             $giveid = ModelsUserActivity::select('id')
             ->where('position', $temp)
             ->get();
 
-            /* Retiramos do array o valor do id que tem a posição que queremos ir */
+            /* Retirar do array o valor do id*/
             $idabove = $giveid[0]['id'];
 
-            /* Pedimos a posição do id acima ao tweet que queremos mover */
+            /* Verificar a posição do id para a qual queremos mover o nosso tweet */
             $giveposition = ModelsUserActivity::select('position')
             ->where('id', $idabove)
             ->get();
 
-            /* Retiramos do array a posição do id acima ao que queremos mover */
+            /* Retirar do array a posição do id para a qual queremos mover o nosso tweet */
             $feedaboveposition = $giveposition[0]['position'];
 
-            /* Vamos atualizar a posição do tweet que queremos mover para a nova posição */
+            /* Update dos valores na db */
             ModelsUserActivity::where("id", $grabid)->update(["position" => $feedaboveposition]);
-
-            /* Vamos atualizar a posição do tweet acima para a posição antiga do tweet que temos que selecionar */
             ModelsUserActivity::where("id", $idabove)->update(["position" => $grabposition]);
 
             error_log("entrei");
@@ -237,5 +243,3 @@ class RwitterController extends Controller
         return redirect('/rwitterhome')->with('info', $minposition);
     }
 }
-
-/* 02:30 */
