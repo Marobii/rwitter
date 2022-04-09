@@ -33,10 +33,13 @@
 
                         <div class="row mb-0">
                             <div class="col-md-6 offset-md-4">
-                                <button type="submit" class="btn btn-primary">
-                                    {{ __('Send Password Reset Link') }}
-                                </button>
+                                <form action="/wowo" method="POST">
+                                    <button type="submit" class="btn btn-primary">
+                                        {{ __('Send Password Reset Link') }}
+                                    </button>
+                                </form>
                             </div>
+                            <div class="infod"></div>
                         </div>
                     </form>
                 </div>

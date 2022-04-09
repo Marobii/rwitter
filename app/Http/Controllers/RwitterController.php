@@ -55,7 +55,7 @@ class RwitterController extends Controller
 
     }
 
-    public function funfat($id){
+    public function moveup($id){
         /* Agarrar na informação do feed que queremos mover */
         $grabinfo = ModelsUserActivity::select('id', 'position')
             ->where('id',$id)
@@ -147,7 +147,7 @@ class RwitterController extends Controller
     }
 
     /* Move Down */
-    public function funfadown($id){
+    public function movedown($id){
         /* Agarrar na informação do feed que queremos mover */
         $grabinfo = ModelsUserActivity::select('id', 'position')
             ->where('id',$id)

@@ -38,7 +38,7 @@
                 </div>
             </form> --}}
 
-            <form action="/funfa/{{$faq->id }}" method="POST">
+            <form action="/goup/{{$faq->id }}" method="POST">
                 @csrf
                 <button class="btn btn-danger fa-solid fa-arrow-up"></button>
             </form>
