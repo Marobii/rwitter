@@ -55,15 +55,6 @@ class RwitterController extends Controller
 
     }
 
-    /* Apaga da db de acordo com o id */
-    public function destroy($id){
-        $bb = ModelsUserActivity::findOrFail($id);
-        $bb->delete();
-
-        return redirect('/rwitterhome');
-    }
-
-    /* Move Up */
     public function funfat($id){
         /* Agarrar na informação do feed que queremos mover */
         $grabinfo = ModelsUserActivity::select('id', 'position')
@@ -89,14 +80,10 @@ class RwitterController extends Controller
             ->where('position', $confirmnext)
             ->get();
 
-       /*  if(empty($askposition)){
-            ModelsUserActivity::where("id", $grabid)->update(["position" => $maxposition]);
-        } */
         $compare = $grabposition;
         if ($maxposition == $compare){
             error_log("Já estás no topo");
-        }
-        else {
+        }else {
             if(empty($askdb[0])){
                 $checkall=ModelsUserActivity::select('id' , 'position')
                 ->orderBy('position', 'asc')
@@ -171,12 +158,55 @@ class RwitterController extends Controller
         $grabposition =  $grabinfo[0]['position'];
 
         /* Pedir a db a maior posição na db */
-        $mixposition =  ModelsUserActivity::min('position');
+        $minposition =  ModelsUserActivity::min('position');
+        $minid = ModelsUserActivity::select('id')
+            ->where('position', $minposition)
+            ->get();
 
-        /* if para saber se o feed que queremos subir já está no topo */
-        if ($grabposition > $mixposition){
-            /* Não se encontra no topo então */
-            /* Posição para a qual queremos ir ( Posição atual do tweet +1) */
+        /* Sei que o max position tem id = dbgrabid */
+        $dbgrabid = $minid[0]['id'];
+
+        $confirmnext = $grabposition - 1;
+
+        $askdb = ModelsUserActivity::select('id')
+            ->where('position', $confirmnext)
+            ->get();
+
+        $compare = $grabposition;
+        if ($minposition == $compare){
+            error_log("Já estás no fundo");
+        }else {
+            if(empty($askdb[0])){
+                $checkall=ModelsUserActivity::select('id' , 'position')
+                ->orderBy('position', 'asc')
+                ->get();
+                foreach($checkall as $index=>$opt){
+                    $test = $checkall[$index]['position'];
+                    if ($test === $grabposition){
+                        error_log("faz nada");
+                    }else {
+                        error_log($checkall);
+                        if ($test < $grabposition && $minposition != $test) {
+
+                            /* Id acima */
+                            $redirect = ModelsUserActivity::select('id')
+                            ->where('position', $test)
+                            ->get();
+
+                            $unveil = $redirect[0]['id'];
+
+                            ModelsUserActivity::where("id", $unveil)->update(["position" => $grabposition]);
+                            ModelsUserActivity::where("id", $grabid)->update(["position" => $test]);
+
+                            break;
+                        }
+                    }
+                }
+                /* [{"id":17,"position":3},{"id":18,"position":2},{"id":21,"position":19},{"id":22,"position":22}] */
+                /* ModelsUserActivity::where("id", $tradeid)->update(["position" => $trade2position]);
+                ModelsUserActivity::where("id", $trade2id)->update(["position" => $tradeposition]); */
+
+            } else {
                 $temp = $grabposition - 1;
 
             /* Pedimos a db o id da posição que queremos ir $temp */
@@ -200,22 +230,12 @@ class RwitterController extends Controller
 
             /* Vamos atualizar a posição do tweet acima para a posição antiga do tweet que temos que selecionar */
             ModelsUserActivity::where("id", $idabove)->update(["position" => $grabposition]);
+
             error_log("entrei");
-
-        } else {
-            /* Encontra-se no topo */
-            error_log("não entrei");
+            }
         }
-
-        return redirect('/rwitterhome')->with('info');
+        return redirect('/rwitterhome')->with('info', $minposition);
     }
 }
-/*
-Procurar a próxima posição disponivel
 
-foreach position procurar a que for < que a atual
-
-Retorna todos os dados da database by position
-$checkall = ModelsUserActivity::orderBy('position', 'desc')->get();
-
-*/
+/* 02:06 */
